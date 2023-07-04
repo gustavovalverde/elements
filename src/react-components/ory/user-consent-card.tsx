@@ -3,10 +3,24 @@ import { Button } from "../button"
 import { Card } from "../card"
 import { Typography } from "../typography"
 
-import { OAuth2Client, OAuth2ConsentRequest } from "@ory/client"
+import {
+  OAuth2Client,
+  OAuth2ConsentRequest,
+  AcceptOAuth2ConsentRequest,
+} from "@ory/client"
 
 import { Checkbox } from "../checkbox"
 import { Divider } from "../divider"
+import React from "react"
+import { CustomOnSubmit, CustomOnSubmitCallback } from "./helpers/common"
+
+export type ConsentFormPayload = {
+  grant_scope: string[]
+  remember: boolean
+  consent_action: string
+  consent_challenge: string
+  _csrf: string
+}
 
 export type UserConsentCardProps = {
   csrfToken: string
@@ -17,6 +31,7 @@ export type UserConsentCardProps = {
   client?: OAuth2Client
   action: string
   className?: string
+  onSubmit?: CustomOnSubmitCallback<ConsentFormPayload>
 }
 
 export const UserConsentCard = ({
@@ -28,6 +43,7 @@ export const UserConsentCard = ({
   client,
   action,
   className,
+  onSubmit,
 }: UserConsentCardProps) => {
   return (
     <Card
@@ -39,7 +55,13 @@ export const UserConsentCard = ({
       }
       image={cardImage}
     >
-      <form action={action} method="post">
+      <form
+        action={action}
+        method="post"
+        {...(onSubmit && {
+          onSubmit: CustomOnSubmit<AcceptOAuth2ConsentRequest>,
+        })}
+      >
         <input type="hidden" name="_csrf" value={csrfToken} />
         <input
           type="hidden"
